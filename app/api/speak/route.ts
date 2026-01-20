@@ -7,13 +7,16 @@ export async function POST(req: NextRequest) {
 
     const ai = getGeminiClient();
 
+    const selectedVoice = voicePersona.geminiModelName || 'Puck';
+    console.log(`[Gemini TTS] selectedVoice: ${selectedVoice}, model: gemini-2.5-flash-preview-tts`);
+
     // Use gemini-2.5-flash-preview-tts for official SpeechConfig support.
     const generationConfig: any = {
       responseModalities: ['AUDIO'],
       speechConfig: {
         voiceConfig: {
           prebuiltVoiceConfig: {
-            voiceName: voicePersona.geminiModelName || 'Puck' // Default to Puck if not set
+            voiceName: selectedVoice
           }
         }
       }
