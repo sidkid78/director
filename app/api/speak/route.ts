@@ -7,20 +7,44 @@ export async function POST(req: NextRequest) {
 
     const ai = getGeminiClient();
 
-    // Note: Gemini 2.5 Pro can generate audio if requested.
-    // We use a prompt that describes the persona to influence the TTS style.
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-pro-preview-tts',
-      contents: `Persona: ${voicePersona.description}
-      Gender: ${voicePersona.gender}
-      Tone: ${voicePersona.tone.join(', ')}
-      Age: ${voicePersona.age}
-      
-      Speak the following text exactly as this persona: "${text}"`,
-      config: {
-        // @ts-ignore - responseModalities might not be in the type def yet but supported by API
-        responseModalities: ['AUDIO']
+    // Use gemini-2.5-flash-preview-tts for official SpeechConfig support.
+    const generationConfig: any = {
+      responseModalities: ['AUDIO'],
+      speechConfig: {
+        voiceConfig: {
+          prebuiltVoiceConfig: {
+            voiceName: voicePersona.geminiModelName || 'Puck' // Default to Puck if not set
+          }
+        }
       }
+    };
+
+    const prompt = `
+# AUDIO PROFILE: ${voicePersona.name}
+Role: ${voicePersona.description}
+Gender: ${voicePersona.gender}
+Age: ${voicePersona.age}
+
+## THE SCENE: Voice Output
+Reading a response to the user clearly and naturally.
+
+### DIRECTOR'S NOTES
+Style: ${voicePersona.tone.join(', ')}
+Pacing: Natural
+
+#### TRANSCRIPT
+${text}`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-preview-tts',
+      contents: {
+        parts: [
+          {
+            text: prompt
+          }
+        ]
+      },
+      config: generationConfig
     });
 
     // Find the audio part in the response
