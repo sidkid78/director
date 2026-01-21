@@ -1,36 +1,142 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# VoiceApp - AI Voice Selection & Generation
 
-## Getting Started
+VoiceApp is a modern web application designed for casting directors and creators to find, analyze, and generate high-quality AI speech using Gemini models. Built with Next.js 16 and the latest Google GenAI SDK, it offers an immersive 3D experience for voice exploration.
 
-First, run the development server:
+## 🚀 Tech Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Framework:** [Next.js 16 (App Router)](https://nextjs.org/)
+- **AI Models:** 
+  - **Gemini 2.5 Flash TTS:** Real-time high-fidelity Text-to-Speech.
+  - **Gemini 3 Flash:** Advanced reasoning for voice analysis and casting recommendations.
+- **SDK:** [@google/genai](https://www.npmjs.com/package/@google/genai) (Official Google GenAI SDK)
+- **Styling:** [Tailwind CSS 4](https://tailwindcss.com/)
+- **Animations:** [Framer Motion](https://www.framer.com/motion/)
+- **Icons:** [Lucide React](https://lucide.dev/)
+- **Language:** [TypeScript](https://www.typescriptlang.org/)
+
+## 🏗️ Architecture
+
+VoiceApp follows a modern server-client architecture leveraging Next.js:
+
+1.  **Frontend (Client):** 
+    - Interactive 3D UI for voice browsing.
+    - Audio processing and visualization using the Web Audio API.
+    - State management via React hooks.
+2.  **Backend (Server):**
+    - Next.js API Routes (`/api/speak`, `/api/analyze`) acting as a secure proxy to Google Gemini.
+    - Structured output generation for casting logic.
+    - WAV header injection for raw PCM audio returned by Gemini TTS.
+
+## 📁 Directory Structure
+
+```text
+voice_app/
+├── app/                  # Next.js App Router (Pages & API)
+│   ├── api/              # Backend Endpoints
+│   │   ├── analyze/      # AI Casting Analysis
+│   │   └── speak/        # Text-to-Speech Generation
+│   └── page.tsx          # Main Entry Point
+├── components/           # UI Components (3D Carousel, Visualizers, Cards)
+├── hooks/                # Custom React Hooks
+├── lib/                  # Shared Utilities (Gemini Client, Helpers)
+├── public/               # Static Assets
+├── services/             # API Service Wrappers
+├── types/                # TypeScript Definitions
+├── next.config.ts        # Next.js Configuration
+└── tailwind.config.ts    # Tailwind CSS Configuration
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd voice_app
+    ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-## Learn More
+3.  **Environment Setup:**
+    Create a `.env.local` file in the root directory and add your Gemini API Key:
+    ```env
+    GEMINI_API_KEY=your_api_key_here
+    ```
 
-To learn more about Next.js, take a look at the following resources:
+4.  **Run the development server:**
+    ```bash
+    npm run dev
+    ```
+    Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📡 API Documentation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 1. Text-to-Speech (`POST /api/speak`)
+Generates high-quality audio from text using a specific voice persona.
 
-## Deploy on Vercel
+**Request Body:**
+```json
+{
+  "text": "Hello, I am ready to record.",
+  "voicePersona": {
+    "name": "Puck",
+    "geminiModelName": "Puck",
+    "description": "Energetic and youthful",
+    "gender": "Male",
+    "age": "Young Adult",
+    "tone": ["Excited", "Fast-paced"]
+  }
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Response:**
+```json
+{
+  "audioBase64": "...", // Base64 encoded WAV audio
+  "mimeType": "audio/wav"
+}
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 2. Voice Analysis (`POST /api/analyze`)
+Uses Gemini 3 Flash to recommend the best voices based on a character description or project prompt.
+
+**Request Body:**
+```json
+{
+  "prompt": "I need a deep, authoritative voice for a space commander.",
+  "voices": [...] // Array of available voice objects
+}
+```
+
+**Response:**
+```json
+{
+  "recommendations": [
+    {
+      "voiceId": "v1",
+      "score": 0.95,
+      "reasoning": "This voice has the gravitas and authority required for a military leader."
+    }
+  ]
+}
+```
+
+## ⚙️ Configuration
+
+- **Next.js Config:** Custom configurations for image optimization and experimental features are located in `next.config.ts`.
+- **Gemini Initialization:** The AI client is initialized in `lib/gemini.ts` using the `GoogleGenAI` class.
+- **Tailwind:** Global styles and design tokens are managed in `app/globals.css` and the Tailwind configuration.
+
+## 🎙️ Usage Examples
+
+### Generating Speech
+Select a voice from the 3D carousel, type your script in the input box, and hit "Generate". The app will fetch the audio and display a real-time visualization as it plays.
+
+### Smart Casting
+Click on the "Voice Finder" icon, describe your character (e.g., "A wise old tree with a rasping voice"), and let the AI analyze the library to find your perfect match.
+
+---
+
+*Built with ❤️ using Google Gemini and Next.js.*
